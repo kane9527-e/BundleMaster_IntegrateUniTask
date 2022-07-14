@@ -1,5 +1,5 @@
-# BundleMaster_IntegrateETTask
-<br/>BundleMaster资源加载集成ETTask示例工程</br>
+# BundleMaster_IntegrateUniTask
+<br/>BundleMaster资源加载集成UniTask示例工程,小弟不才,想替换ETTask为更强大的UniTask,替换不知道是否正确,如有问题请指正,感谢91焦先生</br>
 
 <br/>网站地址: https://www.unitybundlemaster.com</br>
 <br/>视频教程</br>
