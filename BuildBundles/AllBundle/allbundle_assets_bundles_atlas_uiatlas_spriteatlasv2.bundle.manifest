@@ -1,0 +1,24 @@
+ManifestFileVersion: 0
+CRC: 2442884080
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: c55f1901cc16fe99426758485ced12ca
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c29c357128feff56790ec9816c4fc93d
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 687078895
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Bundles/Atlas/UIAtlas.spriteatlasv2
+Dependencies:
+- G:/BundleMaster_IntegrateETTask/BuildBundles/AllBundle/allbundle_assets_res_ui_91logo_png.bundle
+- G:/BundleMaster_IntegrateETTask/BuildBundles/AllBundle/allbundle_assets_res_ui_loginbg_jpg.bundle
+- G:/BundleMaster_IntegrateETTask/BuildBundles/AllBundle/allbundle_assets_res_ui_xjj_jpg.bundle

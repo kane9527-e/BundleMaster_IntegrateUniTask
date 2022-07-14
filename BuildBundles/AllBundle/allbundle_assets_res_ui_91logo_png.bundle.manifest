@@ -1,0 +1,19 @@
+ManifestFileVersion: 0
+CRC: 184296295
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 1b71f0fc00dc645b90bfc35db56dc76d
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 923768aebf385ad86f7762daa8034951
+HashAppended: 0
+ClassTypes:
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 687078895
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Res/UI/91logo.png
+Dependencies: []
