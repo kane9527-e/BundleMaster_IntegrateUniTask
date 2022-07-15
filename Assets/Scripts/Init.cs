@@ -7,75 +7,101 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 
-
 public class Init : MonoBehaviour
 {
     private Transform uiManagerTf;
+    private UpdateBundleDataInfo updateBundleDataInfo;
     
     private void Awake()
     {
-
+        System.AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
+        {
+            AssetLogHelper.LogError(e.ExceptionObject.ToString());
+        };
+       // UniTask.ExceptionHandler += AssetLogHelper.LogError;
     }
 
     void Start()
     {
         DontDestroyOnLoad(gameObject);
-        Initialization().Forget();
+        Initialization();
     }
     
     void Update()
     {
         AssetComponent.Update();
     }
-    private async UniTask Initialization()
+    
+    void OnDestroy()
+    {
+        updateBundleDataInfo?.CancelUpdate();
+    }
+
+    private void Initialization()
     {
         //重新配置热更路径(开发方便用, 打包移动端需要注释注释)
         AssetComponentConfig.HotfixPath = Application.dataPath + "/../HotfixBundles/";
         uiManagerTf = gameObject.transform.Find("UIManager");
-        await CheckHotfix();
+        AssetComponentConfig.DefaultBundlePackageName = "AllBundle";
+        //创建下载UI
+        GameObject downLoadUI = GameObject.Instantiate(Resources.Load<GameObject>("DownLoadUI"), uiManagerTf);
+        DownLoad(downLoadUI).Forget();
     }
     
-    private async UniTask CheckHotfix()
+    /// <summary>
+    /// 下载资源
+    /// </summary>
+    private async UniTaskVoid DownLoad(GameObject downLoadUI)
     {
-        AssetComponentConfig.DefaultBundlePackageName = "AllBundle";
+        downLoadUI.SetActive(false);
         Dictionary<string, bool> updatePackageBundle = new Dictionary<string, bool>()
         {
             {AssetComponentConfig.DefaultBundlePackageName, false},
             {"SubBundle", false},
-            {"OriginFile", false},
+            //{"OriginFile", false},
         };
-        UpdateBundleDataInfo updateBundleDataInfo = await AssetComponent.CheckAllBundlePackageUpdate(updatePackageBundle);
-        if (updateBundleDataInfo.NeedUpdate)
-        {
-            Debug.LogError("需要更新, 大小: " + updateBundleDataInfo.NeedUpdateSize);
-            //创建下载UI
-            GameObject downLoadUI = GameObject.Instantiate(Resources.Load<GameObject>("DownLoadUI"), uiManagerTf);
-            Slider progressSlider = downLoadUI.transform.Find("ProgressSlider").GetComponent<Slider>();
-            Text progressText = downLoadUI.transform.Find("ProgressValue/Text").GetComponent<Text>();
-            Text speedText = downLoadUI.transform.Find("SpeedValue/Text").GetComponent<Text>();
-            updateBundleDataInfo.DownLoadFinishCallback += () =>
-            {
-                GameObject.Destroy(downLoadUI);
-                InitializePackage().Forget();
-            };
-            updateBundleDataInfo.ProgressCallback += p =>
-            {
-                progressSlider.value = p / 100.0f;
-                progressText.text = p.ToString("#0.00") + "%";
-            };
-            updateBundleDataInfo.DownLoadSpeedCallback += s =>
-            {
-                speedText.text = (s / 1024.0f).ToString("#0.00") + " kb/s";
-            };
-            AssetComponent.DownLoadUpdate(updateBundleDataInfo).Forget();
-        }
-        else
+        updateBundleDataInfo = await AssetComponent.CheckAllBundlePackageUpdate(updatePackageBundle);
+        if (!updateBundleDataInfo.NeedUpdate)
         {
             InitializePackage().Forget();
+            return;
         }
+        downLoadUI.SetActive(true);
+        Debug.LogError("需要更新, 大小: " + updateBundleDataInfo.NeedUpdateSize);
+        Slider progressSlider = downLoadUI.transform.Find("ProgressSlider").GetComponent<Slider>();
+        Text progressText = downLoadUI.transform.Find("ProgressValue/Text").GetComponent<Text>();
+        Text speedText = downLoadUI.transform.Find("SpeedValue/Text").GetComponent<Text>();
+        Button cancelDownLoad = downLoadUI.transform.Find("Cancel").GetComponent<Button>();
+        Button reDownLoad = downLoadUI.transform.Find("ReDown").GetComponent<Button>();
+        updateBundleDataInfo.DownLoadFinishCallback += () =>
+        {
+            GameObject.Destroy(downLoadUI);
+            InitializePackage().Forget();
+        };
+        updateBundleDataInfo.ProgressCallback += p =>
+        {
+            progressSlider.value = p / 100.0f;
+            progressText.text = p.ToString("#0.00") + "%";
+        };
+        updateBundleDataInfo.DownLoadSpeedCallback += s =>
+        {
+            speedText.text = (s / 1024.0f).ToString("#0.00") + " kb/s";
+        };
+        updateBundleDataInfo.ErrorCancelCallback += () =>
+        {
+            Debug.LogError("下载取消");
+        };
+        cancelDownLoad.onClick.RemoveAllListeners();
+        cancelDownLoad.onClick.AddListener(updateBundleDataInfo.CancelUpdate);
+        reDownLoad.onClick.RemoveAllListeners();
+        reDownLoad.onClick.AddListener(() =>
+        {
+            DownLoad(downLoadUI).Forget();
+        });
+        AssetComponent.DownLoadUpdate(updateBundleDataInfo).Forget();
     }
-
-    private async UniTask InitializePackage()
+    
+    private async UniTaskVoid InitializePackage()
     {
         await AssetComponent.Initialize(AssetComponentConfig.DefaultBundlePackageName);
         await AssetComponent.Initialize("SubBundle");
@@ -102,7 +128,7 @@ public class Init : MonoBehaviour
         });
     }
 
-    private async UniTask LoadNewScene()
+    private async UniTaskVoid LoadNewScene()
     {
         LoadSceneHandler loadSceneHandler = await AssetComponent.LoadSceneAsync(BPath.Assets_Scenes_Game__unity);
         //如果需要获取场景加载进度, 用这种加载方式 loadSceneHandler2.GetProgress() , 注意进度不是线性的
@@ -129,14 +155,14 @@ public class Init : MonoBehaviour
         };
     }
 
-    private async UniTask LoadGroupTest()
+    private async UniTaskVoid LoadGroupTest()
     {
         Texture zfnp = await AssetComponent.LoadAsync<Texture>(out LoadHandler handler, BPath.Assets_Bundles_GroupBundle_zfnp__jpg);
         //Debug.LogError(zfnp.height);
         handler.UnLoad();
     }
     
-    private async UniTask ResetUI()
+    private async UniTaskVoid ResetUI()
     {
         //异步加载资源
         UnityEngine.Object resetUIAsset = await AssetComponent.LoadAsync(BPath.Assets_Bundles_ResetUI__prefab);
@@ -150,7 +176,7 @@ public class Init : MonoBehaviour
             operation.completed += asyncOperation =>
             {
                 //重新加载资源
-                Initialization().Forget();
+                Initialization();
             };
         });
     }

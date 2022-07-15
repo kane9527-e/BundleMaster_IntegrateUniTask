@@ -64,9 +64,8 @@ namespace BM
         /// <summary>
         /// 加载计数器(负责完成所有依赖的Bundle加载完成)
         /// </summary>
-        protected async UniTask LoadAsyncLoader(LoadBase loadBase, UniTaskCompletionSource baseTcs)
+        protected async UniTaskVoid LoadAsyncLoader(LoadBase loadBase, UniTaskCompletionSource baseTcs)
         {
-
             UniTaskCompletionSource tcs = new UniTaskCompletionSource();
             loadBase.LoadAssetBundleAsync(tcs, BundlePackageName).Forget();
             await tcs.Task;

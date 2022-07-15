@@ -316,7 +316,7 @@ namespace BM
             }
             if (loadHandler.LoadState == LoadState.NoLoad)
             {
-                UniTaskCompletionSource tcs =  new UniTaskCompletionSource();
+                UniTaskCompletionSource tcs = new UniTaskCompletionSource();
                 loadHandler.AwaitUniTasks.Add(tcs);
                 await loadHandler.LoadAsync();
                 AssetBundleRequest loadAssetAsync = loadHandler.FileAssetBundle.LoadAssetAsync(assetPath);
@@ -395,7 +395,7 @@ namespace BM
                 finishTcs.TrySetResult((T)loadAssetAsync.asset);
             };
         }
-        private static async UniTask LoadAsyncTcs(LoadHandler handlerRef, string assetPath, UniTaskCompletionSource<UnityEngine.Object> finishTcs)
+        private static async UniTaskVoid LoadAsyncTcs(LoadHandler handlerRef, string assetPath, UniTaskCompletionSource<UnityEngine.Object> finishTcs)
         {
             await handlerRef.LoadAsync();
             AssetBundleRequest loadAssetAsync = handlerRef.FileAssetBundle.LoadAssetAsync<UnityEngine.Object>(assetPath);
@@ -454,7 +454,7 @@ namespace BM
                 return null;
             }
             bundleRuntimeInfo.UnLoadHandler.Add(loadSceneHandler.UniqueId, loadSceneHandler);
-            UniTaskCompletionSource tcs =  new UniTaskCompletionSource();
+            UniTaskCompletionSource tcs = new UniTaskCompletionSource();
             await loadSceneHandler.LoadSceneBundleAsync(tcs);
             return loadSceneHandler;
         }
@@ -479,7 +479,7 @@ namespace BM
             if (!BundleNameToRuntimeInfo.TryGetValue(bundlePackageName, out BundleRuntimeInfo bundleRuntimeInfo))
             {
                 AssetLogHelper.LogError(bundlePackageName + "分包没有初始化");
-                tcs.TrySetCanceled();
+                tcs.TrySetException(new System.Exception(bundlePackageName + "分包没有初始化"));
                 return tcs.Task;
             }
             bundleRuntimeInfo.UnLoadHandler.Add(loadSceneHandler.UniqueId, loadSceneHandler);
@@ -536,7 +536,7 @@ namespace BM
             if (!BundleNameToRuntimeInfo.TryGetValue(bundlePackageName, out BundleRuntimeInfo bundleRuntimeInfo))
             {
                 AssetLogHelper.LogError("加载Shader没有此分包: " + bundlePackageName);
-                tcs.TrySetCanceled();
+                tcs.TrySetException(new System.Exception("加载Shader没有此分包: " + bundlePackageName));
                 return tcs.Task;
             }
             
