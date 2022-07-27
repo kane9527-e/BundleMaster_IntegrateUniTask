@@ -18,7 +18,7 @@ public class Init : MonoBehaviour
         {
             AssetLogHelper.LogError(e.ExceptionObject.ToString());
         };
-       // UniTask.ExceptionHandler += AssetLogHelper.LogError;
+        //UniTask.ExceptionHandler += AssetLogHelper.LogError;
     }
 
     void Start()
@@ -58,7 +58,7 @@ public class Init : MonoBehaviour
         {
             {AssetComponentConfig.DefaultBundlePackageName, false},
             {"SubBundle", false},
-            //{"OriginFile", false},
+            {"OriginFile", false},
         };
         updateBundleDataInfo = await AssetComponent.CheckAllBundlePackageUpdate(updatePackageBundle);
         if (!updateBundleDataInfo.NeedUpdate)

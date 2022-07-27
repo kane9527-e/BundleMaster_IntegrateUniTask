@@ -235,6 +235,7 @@ namespace BM
             //卸载之前就已经添加到真卸载池的资源
             foreach (var loadBase in TrueUnLoadPool)
             {
+                //AssetLogHelper.LogError("AutoAddToTrueUnLoadPool==== "+ loadBase.Key);
                 PreUnLoadPool.Remove(loadBase.Key);
                 loadBase.Value.UnLoad();
             }

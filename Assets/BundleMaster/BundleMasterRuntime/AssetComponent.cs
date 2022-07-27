@@ -383,7 +383,7 @@ namespace BM
         }
         public static UniTask<UnityEngine.Object> LoadAsync(out LoadHandler handler, string assetPath, string bundlePackageName) => LoadAsync(out handler, assetPath, false, bundlePackageName);
         
-        private static async UniTask LoadAsyncTcs<T>(LoadHandler handlerRef, string assetPath, UniTaskCompletionSource<T> finishTcs) where T : UnityEngine.Object
+        private static async UniTaskVoid LoadAsyncTcs<T>(LoadHandler handlerRef, string assetPath, UniTaskCompletionSource<T> finishTcs) where T : UnityEngine.Object
         {
             await handlerRef.LoadAsync();
             AssetBundleRequest loadAssetAsync = handlerRef.FileAssetBundle.LoadAssetAsync<T>(assetPath);
@@ -395,7 +395,7 @@ namespace BM
                 finishTcs.TrySetResult((T)loadAssetAsync.asset);
             };
         }
-        private static async UniTaskVoid LoadAsyncTcs(LoadHandler handlerRef, string assetPath, UniTaskCompletionSource<UnityEngine.Object> finishTcs)
+        private static async UniTask LoadAsyncTcs(LoadHandler handlerRef, string assetPath, UniTaskCompletionSource<UnityEngine.Object> finishTcs)
         {
             await handlerRef.LoadAsync();
             AssetBundleRequest loadAssetAsync = handlerRef.FileAssetBundle.LoadAssetAsync<UnityEngine.Object>(assetPath);
@@ -479,7 +479,7 @@ namespace BM
             if (!BundleNameToRuntimeInfo.TryGetValue(bundlePackageName, out BundleRuntimeInfo bundleRuntimeInfo))
             {
                 AssetLogHelper.LogError(bundlePackageName + "分包没有初始化");
-                tcs.TrySetException(new System.Exception(bundlePackageName + "分包没有初始化"));
+                tcs.TrySetCanceled();
                 return tcs.Task;
             }
             bundleRuntimeInfo.UnLoadHandler.Add(loadSceneHandler.UniqueId, loadSceneHandler);
@@ -536,7 +536,7 @@ namespace BM
             if (!BundleNameToRuntimeInfo.TryGetValue(bundlePackageName, out BundleRuntimeInfo bundleRuntimeInfo))
             {
                 AssetLogHelper.LogError("加载Shader没有此分包: " + bundlePackageName);
-                tcs.TrySetException(new System.Exception("加载Shader没有此分包: " + bundlePackageName));
+                tcs.TrySetCanceled();
                 return tcs.Task;
             }
             
